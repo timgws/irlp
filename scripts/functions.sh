@@ -1,6 +1,11 @@
+#@IgnoreInspection AddShebang
+
+CONFIGURATION_PATH=/etc/irlp-script.conf
+
 function die_if_not_root {
     if [[ $UID -ne 0 ]]; then
-        echo "you are not root. please switch to root to use this command!";
+        printhl "you are not root. please switch to root to use this command!";
+        stat_fail
         exit 2;
     fi
 }
@@ -14,9 +19,10 @@ function die_if_not_user {
     USER=$1;
     USER_UID=`cat /etc/passwd | grep ^$USER: | cut -d: -f 3`
     if [ -z "$USER_UID" ]; then
-        echo "The user $USER does not exist!";
+        printhl "The user $USER does not exist!";
     elif [ $UID -ne "$USER_UID" ] && [ $UID -ne 0 ]; then
-        echo "you are not root, or the repeater user ($USER). please switch to use this command!";
+        printhl "you are not root, or the repeater user ($USER). please switch to use this command!";
+        stat_fail
         exit 2;
     fi
 }
@@ -26,7 +32,8 @@ function restart_service {
     if [ -e "/etc/redhat-release" ]; then
         /sbin/service $1 restart
     else
-        echo "I tried to restart ${1}. I failed. You should try it manually.";
+        printhl "I tried to restart ${1}. I failed. You should try it manually.";
+        stat_fail
     fi
 }
 
@@ -136,4 +143,13 @@ stat_done() {
 stat_fail() {
     deltext
     printf "   ${C_OTHER}[${C_FAIL}FAIL${C_OTHER}]${C_CLEAR} \n"
+}
+
+load_configuration() {
+    if [[ ! -e "$CONFIGURATION_PATH" ]]; then
+        printhl "The IRLP Scripts configuration has not been done correctly.";
+        printhl "Please fix this, then try running this command again";
+        stat_fail
+        exit 2;
+    fi;
 }
