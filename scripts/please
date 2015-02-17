@@ -1,0 +1,38 @@
+#!/bin/sh
+source "functions.sh"
+load_configuration
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 [enable|disable]";
+    exit 2;
+fi;
+
+PLEASE=$1;
+PLEASE=`perl -e "print lc('$PLEASE');"`
+
+if [[ $PLEASE != "enable" ]] && [[ $PLEASE != "disable" ]]; then
+    printhl "Tell me if I should enable or disable these scripts."
+    stat_fail
+    exit 10;
+fi
+
+if [[ $PLEASE == "enable" ]]; then
+    THE_OPPOSITE="disable";
+    stat_busy "Enabling scripts.";
+    if [[ -e $DONT_RUN_IF_TOUCHED ]]; then
+        /bin/rm -rf $DONT_RUN_IF_TOUCHED;
+        stat_done
+        exit;
+    fi
+elif [[ $PLEASE == "disable" ]]; then
+    THE_OPPOSITE="enable";
+    if [[ ! -e $DONT_RUN_IF_TOUCHED ]]; then
+        touch $DONT_RUN_IF_TOUCHED
+        stat_done;
+        exit;
+    fi
+fi
+
+stat_fail
+echo "The requested action has already been performed. Have you tried $THE_OPPOSITE?";
+exit 1;

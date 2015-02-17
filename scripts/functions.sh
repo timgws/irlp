@@ -153,3 +153,23 @@ load_configuration() {
         exit 2;
     fi;
 }
+
+should_run() {
+    if [[ -e "$DONT_RUN_IF_TOUCHED" ]]; then
+        printhl "IRLP Scripts are disabled.";
+        stat_fail;
+        exit 3;
+    fi;
+}
+
+random_time(){
+    if [ -z "$1" ]; then
+        BASED_ON=1
+    else
+        BASED_ON=$1
+    fi;
+
+    FINEST_HOUR=$((`date +%d+%H`));
+    LEFT_OVER_HOUR=$(($FINEST_HOUR%$BASED_ON));
+    echo $(($LEFT_OVER_HOUR+1));
+}
